@@ -45,6 +45,7 @@ export const POSScreen: React.FC<Props> = ({
 }) => {
   const [currentCategory, setCurrentCategory] = useState<ProductCategory>('celulares');
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [mobileActiveView, setMobileActiveView] = useState<'grid' | 'ticket'>('grid');
 
   // Modals state
   const [showPinModal, setShowPinModal] = useState(false);
@@ -331,33 +332,86 @@ export const POSScreen: React.FC<Props> = ({
             <span>Tiempo Aire</span>
           </button>
         </div>
+        {/* Responsive Mobile Segmented Toggle (lg:hidden) */}
+        <div className="flex lg:hidden items-center p-1 bg-slate-100 rounded-xl border border-slate-200">
+          <button
+            onClick={() => setMobileActiveView('grid')}
+            className={`px-3 py-1 rounded-lg text-xs font-bold transition ${
+              mobileActiveView === 'grid'
+                ? 'bg-white text-slate-900 shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            Catálogo
+          </button>
+          <button
+            onClick={() => setMobileActiveView('ticket')}
+            className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+              mobileActiveView === 'ticket'
+                ? 'bg-cyan-600 text-white shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <span>Ticket</span>
+            {cart.length > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full bg-cyan-700 text-white text-[10px] font-black">
+                {cart.reduce((c, i) => c + i.quantity, 0)}
+              </span>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Main 2-Column POS Body */}
-      {/* Left: Touch Category Tabs + Visual Products Grid */}
-      {/* Right: Ticket + Integrated Calculator / Keypad + Direct Checkout */}
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+      {/* On desktop: side-by-side permanently */}
+      {/* On mobile: fluid display based on mobileActiveView */}
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
         {/* Left Grid Area */}
-        <TouchGrid
-          products={products}
-          currentCategory={currentCategory}
-          onSelectCategory={(cat) => setCurrentCategory(cat)}
-          onProductClick={handleProductClick}
-          onOpenAirtime={() => setShowAirtimeModal(true)}
-          onOpenPayJoy={() => setShowPayJoyModal(true)}
-          gridSize={config.gridSize}
-        />
+        <div className={`flex-1 flex flex-col h-full overflow-hidden ${mobileActiveView === 'ticket' ? 'hidden lg:flex' : 'flex'}`}>
+          <TouchGrid
+            products={products}
+            currentCategory={currentCategory}
+            onSelectCategory={(cat) => setCurrentCategory(cat)}
+            onProductClick={handleProductClick}
+            onOpenAirtime={() => setShowAirtimeModal(true)}
+            onOpenPayJoy={() => setShowPayJoyModal(true)}
+            gridSize={config.gridSize}
+          />
+
+          {/* Floating Ticket Shortcut for mobile phones when items exist */}
+          {cart.length > 0 && (
+            <div className="lg:hidden p-2.5 bg-white border-t border-slate-200 shadow-lg">
+              <button
+                type="button"
+                onClick={() => setMobileActiveView('ticket')}
+                className="w-full py-3 px-4 rounded-2xl bg-cyan-600 hover:bg-cyan-700 text-white font-black text-xs shadow-md shadow-cyan-600/30 flex items-center justify-between active:scale-98 transition"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-white text-cyan-700 flex items-center justify-center text-[11px] font-black">
+                    {cart.reduce((c, i) => c + i.quantity, 0)}
+                  </span>
+                  <span>Ver Ticket y Cobrar</span>
+                </div>
+                <span className="font-mono text-sm">
+                  ${cart.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })} ➔
+                </span>
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* Right Ticket & Calculator */}
-        <TicketAndKeypad
-          cart={cart}
-          onUpdateQuantity={handleUpdateQuantity}
-          onRemoveItem={handleRemoveItem}
-          onClearCart={handleClearCart}
-          onCheckout={handleCheckout}
-          onOpenPayJoy={() => setShowPayJoyModal(true)}
-          onOpenAirtime={() => setShowAirtimeModal(true)}
-        />
+        <div className={`w-full lg:w-96 xl:w-[410px] h-full ${mobileActiveView === 'grid' ? 'hidden lg:flex' : 'flex'}`}>
+          <TicketAndKeypad
+            cart={cart}
+            onUpdateQuantity={handleUpdateQuantity}
+            onRemoveItem={handleRemoveItem}
+            onClearCart={handleClearCart}
+            onCheckout={handleCheckout}
+            onOpenPayJoy={() => setShowPayJoyModal(true)}
+            onOpenAirtime={() => setShowAirtimeModal(true)}
+          />
+        </div>
       </div>
 
       {/* Supervisor PIN Modal */}

@@ -1,11 +1,12 @@
-import { Product, SaleTransaction, PayJoyApplication, ShiftRegister, StoreConfig } from '../types/pos';
-import { INITIAL_PRODUCTS, INITIAL_SALES, INITIAL_PAYJOY_APPLICATIONS, INITIAL_SHIFT, INITIAL_CONFIG } from '../data/sampleData';
+import { Product, SaleTransaction, PayJoyApplication, ShiftRegister, StoreConfig, RepairTicket } from '../types/pos';
+import { INITIAL_PRODUCTS, INITIAL_SALES, INITIAL_PAYJOY_APPLICATIONS, INITIAL_SHIFT, INITIAL_CONFIG, INITIAL_REPAIRS } from '../data/sampleData';
 
 const STORAGE_KEYS = {
   CLEARED_SAMPLE: 'celulares_pos_cleared_sample_data',
   PRODUCTS: 'celulares_pos_products_v1',
   SALES: 'celulares_pos_sales_v1',
   PAYJOY: 'celulares_pos_payjoy_v1',
+  REPAIRS: 'celulares_pos_repairs_v1',
   SHIFT: 'celulares_pos_shift_v1',
   CONFIG: 'celulares_pos_config_v1',
   SHIFTS_HISTORY: 'celulares_pos_shifts_history_v1',
@@ -78,6 +79,24 @@ export const StorageService = {
     localStorage.setItem(STORAGE_KEYS.PAYJOY, JSON.stringify(apps));
   },
 
+  getRepairs(): RepairTicket[] {
+    const isCleared = this.isSampleDataCleared();
+    const stored = localStorage.getItem(STORAGE_KEYS.REPAIRS);
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch {
+        return isCleared ? [] : (INITIAL_REPAIRS as RepairTicket[]);
+      }
+    }
+    if (isCleared) return [];
+    return INITIAL_REPAIRS as RepairTicket[];
+  },
+
+  saveRepairs(repairs: RepairTicket[]) {
+    localStorage.setItem(STORAGE_KEYS.REPAIRS, JSON.stringify(repairs));
+  },
+
   getCurrentShift(): ShiftRegister | null {
     const isCleared = this.isSampleDataCleared();
     const stored = localStorage.getItem(STORAGE_KEYS.SHIFT);
@@ -138,10 +157,11 @@ export const StorageService = {
    * Completely clears sample data from the browser and sets the permanent flag
    * so that the browser will never display sample data again on refreshes.
    */
-  wipeAllSampleData(): { success: boolean; clearedCount: { products: number; sales: number; payjoy: number } } {
+  wipeAllSampleData(): { success: boolean; clearedCount: { products: number; sales: number; payjoy: number; repairs: number } } {
     const currentProducts = this.getProducts().length;
     const currentSales = this.getSales().length;
     const currentPayjoy = this.getPayJoyApplications().length;
+    const currentRepairs = this.getRepairs().length;
 
     // Set permanent flag
     localStorage.setItem(STORAGE_KEYS.CLEARED_SAMPLE, 'true');
@@ -150,6 +170,7 @@ export const StorageService = {
     localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify([]));
     localStorage.setItem(STORAGE_KEYS.SALES, JSON.stringify([]));
     localStorage.setItem(STORAGE_KEYS.PAYJOY, JSON.stringify([]));
+    localStorage.setItem(STORAGE_KEYS.REPAIRS, JSON.stringify([]));
     localStorage.removeItem(STORAGE_KEYS.SHIFT);
     localStorage.setItem(STORAGE_KEYS.SHIFTS_HISTORY, JSON.stringify([]));
 
@@ -164,6 +185,7 @@ export const StorageService = {
         products: currentProducts,
         sales: currentSales,
         payjoy: currentPayjoy,
+        repairs: currentRepairs,
       },
     };
   },
@@ -176,6 +198,7 @@ export const StorageService = {
     localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(INITIAL_PRODUCTS));
     localStorage.setItem(STORAGE_KEYS.SALES, JSON.stringify(INITIAL_SALES));
     localStorage.setItem(STORAGE_KEYS.PAYJOY, JSON.stringify(INITIAL_PAYJOY_APPLICATIONS));
+    localStorage.setItem(STORAGE_KEYS.REPAIRS, JSON.stringify(INITIAL_REPAIRS));
     localStorage.setItem(STORAGE_KEYS.SHIFT, JSON.stringify(INITIAL_SHIFT));
     const cfg = { ...INITIAL_CONFIG, sampleDataCleared: false };
     this.saveConfig(cfg);
@@ -191,6 +214,7 @@ export const StorageService = {
       products: this.getProducts(),
       sales: this.getSales(),
       payjoyApplications: this.getPayJoyApplications(),
+      repairs: this.getRepairs(),
       currentShift: this.getCurrentShift(),
       shiftsHistory: this.getShiftsHistory(),
     };

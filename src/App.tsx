@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { UserRole, Product, SaleTransaction, PayJoyApplication, ShiftRegister, StoreConfig } from './types/pos';
+import { UserRole, Product, SaleTransaction, PayJoyApplication, ShiftRegister, StoreConfig, RepairTicket } from './types/pos';
 import { StorageService } from './services/storage';
 import { RoleSelector } from './components/RoleSelector';
 import { Header } from './components/Header';
@@ -11,6 +11,7 @@ import { PayJoyManager } from './components/payjoy/PayJoyManager';
 import { ShiftManager } from './components/shifts/ShiftManager';
 import { AdminSettings } from './components/admin/AdminSettings';
 import { ReportsView } from './components/reports/ReportsView';
+import { RepairManager } from './components/repairs/RepairManager';
 
 export default function App() {
   // Session & navigation state
@@ -23,6 +24,7 @@ export default function App() {
   const [products, setProducts] = useState<Product[]>([]);
   const [sales, setSales] = useState<SaleTransaction[]>([]);
   const [payjoyApps, setPayjoyApps] = useState<PayJoyApplication[]>([]);
+  const [repairs, setRepairs] = useState<RepairTicket[]>([]);
   const [currentShift, setCurrentShift] = useState<ShiftRegister | null>(null);
   const [shiftsHistory, setShiftsHistory] = useState<ShiftRegister[]>([]);
   const [config, setConfig] = useState<StoreConfig>(StorageService.getConfig());
@@ -32,6 +34,7 @@ export default function App() {
     setProducts(StorageService.getProducts());
     setSales(StorageService.getSales());
     setPayjoyApps(StorageService.getPayJoyApplications());
+    setRepairs(StorageService.getRepairs());
     setCurrentShift(StorageService.getCurrentShift());
     setShiftsHistory(StorageService.getShiftsHistory());
     setConfig(StorageService.getConfig());
@@ -151,12 +154,18 @@ export default function App() {
     StorageService.saveConfig(updated);
   };
 
+  const handleUpdateRepairs = (newRepairs: RepairTicket[]) => {
+    setRepairs(newRepairs);
+    StorageService.saveRepairs(newRepairs);
+  };
+
   // Permanent Wipe of Sample Data
   const handleWipeSampleData = () => {
     const res = StorageService.wipeAllSampleData();
     setProducts([]);
     setSales([]);
     setPayjoyApps([]);
+    setRepairs([]);
     setCurrentShift(null);
     setShiftsHistory([]);
     const updatedCfg = StorageService.getConfig();
@@ -170,6 +179,7 @@ export default function App() {
     setProducts(StorageService.getProducts());
     setSales(StorageService.getSales());
     setPayjoyApps(StorageService.getPayJoyApplications());
+    setRepairs(StorageService.getRepairs());
     setCurrentShift(StorageService.getCurrentShift());
     setConfig(StorageService.getConfig());
   };
@@ -177,9 +187,11 @@ export default function App() {
   // Role Selection
   const handleSelectRole = (role: UserRole) => {
     setActiveRole(role);
-    // Cashier goes straight into minimalist POS
+    // Role routes
     if (role === 'cajero') {
       setCurrentModule('pos');
+    } else if (role === 'tecnico') {
+      setCurrentModule('repairs');
     } else {
       setCurrentModule('pos');
     }
@@ -229,6 +241,8 @@ export default function App() {
               onExitPOS={() => {
                 if (activeRole === 'cajero') {
                   setCurrentModule('shifts');
+                } else if (activeRole === 'tecnico') {
+                  setCurrentModule('repairs');
                 } else {
                   setCurrentModule('inventory');
                 }
@@ -263,6 +277,14 @@ export default function App() {
               onOpenShift={handleOpenShift}
               onCloseShift={handleCloseShift}
               shiftsHistory={shiftsHistory}
+            />
+          )}
+
+          {currentModule === 'repairs' && (
+            <RepairManager
+              repairs={repairs}
+              onUpdateRepairs={handleUpdateRepairs}
+              technicianName={activeRole === 'tecnico' ? 'Mario Ruiz (Técnico)' : 'Supervisor de Soporte'}
             />
           )}
 

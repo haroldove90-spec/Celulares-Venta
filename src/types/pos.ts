@@ -140,3 +140,23 @@ export interface StoreConfig {
   sampleDataCleared: boolean;
   supabaseReady: boolean;
 }
+
+export type RepairStatus = 'recibido' | 'en_revision' | 'esperando_refaccion' | 'listo_entrega' | 'entregado';
+
+export interface RepairTicket {
+  id: string;
+  folio: string;
+  createdAt: string;
+  customerName: string;
+  customerPhone: string;
+  deviceModel: string;
+  deviceImei: string;
+  issue: string;
+  lockStatus: 'limpio' | 'bloqueo_payjoy' | 'reporte_robo' | 'desconocido';
+  estimatedCost: number;
+  advancePayment: number;
+  status: RepairStatus;
+  technicianName: string;
+  notes?: string;
+}
+

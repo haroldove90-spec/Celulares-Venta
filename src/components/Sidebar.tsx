@@ -10,11 +10,12 @@ import {
   ShieldCheck, 
   Trash2,
   PhoneCall,
+  Wrench,
   Smartphone
 } from 'lucide-react';
 import { UserRole, StoreConfig } from '../types/pos';
 
-export type AppModule = 'pos' | 'inventory' | 'payjoy' | 'shifts' | 'reports' | 'settings';
+export type AppModule = 'pos' | 'inventory' | 'payjoy' | 'shifts' | 'reports' | 'repairs' | 'settings';
 
 interface Props {
   currentModule: AppModule;
@@ -63,6 +64,13 @@ export const Sidebar: React.FC<Props> = ({
       icon: <DollarSign className="w-5 h-5 text-blue-600" />,
       allowedRoles: ['cajero', 'supervisor', 'admin'],
       badge: undefined,
+    },
+    {
+      id: 'repairs' as AppModule,
+      label: 'Taller & Diagnóstico',
+      icon: <Wrench className="w-5 h-5 text-amber-600" />,
+      allowedRoles: ['tecnico', 'supervisor', 'admin'],
+      badge: 'Servicio',
     },
     {
       id: 'reports' as AppModule,

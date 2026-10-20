@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calculator, Package, CreditCard, DollarSign, Settings } from 'lucide-react';
+import { Calculator, Package, CreditCard, DollarSign, Settings, BarChart3, Wrench } from 'lucide-react';
 import { AppModule } from './Sidebar';
 import { UserRole } from '../types/pos';
 
@@ -36,6 +36,18 @@ export const BottomBar: React.FC<Props> = ({ currentModule, onSelectModule, acti
       allowedRoles: ['cajero', 'supervisor', 'admin'],
     },
     {
+      id: 'repairs' as AppModule,
+      label: 'Taller',
+      icon: <Wrench className="w-5 h-5" />,
+      allowedRoles: ['tecnico', 'supervisor', 'admin'],
+    },
+    {
+      id: 'reports' as AppModule,
+      label: 'Reportes',
+      icon: <BarChart3 className="w-5 h-5" />,
+      allowedRoles: ['supervisor', 'admin'],
+    },
+    {
       id: 'settings' as AppModule,
       label: 'Ajustes',
       icon: <Settings className="w-5 h-5" />,
@@ -46,7 +58,7 @@ export const BottomBar: React.FC<Props> = ({ currentModule, onSelectModule, acti
   const visibleItems = navItems.filter((i) => i.allowedRoles.includes(activeRole));
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 py-1.5 flex items-center justify-around shadow-lg safe-area-pb">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 py-1 flex items-center justify-around shadow-lg safe-area-pb overflow-x-auto no-scrollbar">
       {visibleItems.map((item) => {
         const isActive = currentModule === item.id;
         return (
