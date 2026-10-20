@@ -1,0 +1,6 @@
+{
+  "name": "Celulares Venta",
+  "description": "Sistema de Punto de Venta (POS) y Gestión táctil para venta de celulares, accesorios, tiempo aire y créditos PayJoy con control de roles.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

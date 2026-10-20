@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@layer utilities {
+  /* Hide scrollbars while allowing touch scrolling */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Safe area padding for iPhone notch / home bar */
+  .safe-area-pb {
+    padding-bottom: env(safe-area-inset-bottom, 0.5rem);
+  }
+}
+
+/* Thermal printer print format */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print\:hidden {
+    display: none !important;
+  }
+  /* Show only ticket contents when printing */
+  .border-dashed, .border-dashed * {
+    visibility: visible;
+  }
+  .border-dashed {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 80mm;
+    margin: 0;
+    padding: 2mm;
+    font-size: 11px;
+    background: white !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+}
